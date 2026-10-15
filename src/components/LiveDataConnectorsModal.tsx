@@ -169,6 +169,20 @@ export const LiveDataConnectorsModal: React.FC<LiveDataConnectorsModalProps> = (
             </div>
           )}
 
+          {activeTab === 'exercises' && endpointData.exercises?.results && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {endpointData.exercises.results.slice(0, 3).map((ex: any) => (
+                <div key={ex.id} className="p-3 bg-indigo-50/70 border border-indigo-200 rounded-xl space-y-1">
+                  <span className="text-[10px] font-bold uppercase text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded">
+                    {ex.categoryName || 'Strength'}
+                  </span>
+                  <h4 className="text-xs font-bold text-slate-900 mt-1 line-clamp-1">{ex.name}</h4>
+                  <p className="text-[11px] text-slate-600 line-clamp-2">{ex.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
           {activeTab === 'sports' && endpointData.sports?.teams?.[0] && (
             <div className="p-4 bg-slate-900 text-white rounded-2xl flex items-center gap-4">
               <img src={endpointData.sports.teams[0].strBadge} alt="Club" className="w-16 h-16 object-contain" />

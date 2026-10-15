@@ -246,38 +246,69 @@ export const OnlineTraining: React.FC<OnlineTrainingProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-72 overflow-y-auto">
-            {wgerExercises.map((ex) => (
-              <div
-                key={ex.id}
-                onClick={() => {
-                  setSelectedRoutine((prev) => ({
-                    ...prev,
-                    exercises: [
-                      {
-                        name: ex.name || 'Wger Exercise',
-                        sets: 3,
-                        repsOrDuration: '12 reps',
-                        targetMuscle: ex.category?.name || 'Full Body',
-                        instruction: ex.description ? ex.description.replace(/<[^>]*>?/gm, '').slice(0, 120) : 'Perform controlled movement with steady tempo.'
-                      },
-                      ...prev.exercises
-                    ]
-                  }));
-                  playBeep('start');
-                }}
-                className="p-3 bg-slate-50 hover:bg-indigo-50/50 rounded-xl border border-slate-200/80 hover:border-indigo-300 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-900 group-hover:text-indigo-700 line-clamp-1">{ex.name}</span>
-                  <span className="text-[10px] font-semibold text-slate-400 shrink-0 ml-2">ID #{ex.id}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto">
+            {wgerExercises.map((ex) => {
+              const exerciseName =
+                ex.name ||
+                ex.translations?.find((t: any) => t.language === 2 || t.language === '2')?.name ||
+                ex.translations?.[0]?.name ||
+                `Exercise #${ex.id}`;
+
+              const exerciseDesc =
+                ex.description ||
+                ex.translations?.find((t: any) => t.language === 2 || t.language === '2')?.description_source ||
+                ex.translations?.[0]?.description_source ||
+                'Targeted resistance and functional movement.';
+
+              const cleanDesc = exerciseDesc.replace(/<[^>]*>?/gm, '').slice(0, 130);
+              const category = ex.categoryName || ex.category?.name || 'Strength & Conditioning';
+              const equipment = ex.equipmentName || ex.equipment?.[0]?.name || 'Bodyweight';
+
+              return (
+                <div
+                  key={ex.id}
+                  onClick={() => {
+                    setSelectedRoutine((prev) => ({
+                      ...prev,
+                      exercises: [
+                        {
+                          name: exerciseName,
+                          sets: 3,
+                          repsOrDuration: '12 reps',
+                          targetMuscle: category,
+                          instruction: cleanDesc || 'Perform controlled movement with steady tempo.'
+                        },
+                        ...prev.exercises
+                      ]
+                    }));
+                    playBeep('start');
+                  }}
+                  className="p-3.5 bg-slate-50 hover:bg-indigo-50/60 rounded-xl border border-slate-200/90 hover:border-indigo-300 transition-all cursor-pointer group flex flex-col justify-between"
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-slate-900 group-hover:text-indigo-700 line-clamp-1">
+                        {exerciseName}
+                      </span>
+                      <span className="text-[10px] font-bold text-indigo-700 bg-indigo-100/70 px-1.5 py-0.5 rounded shrink-0">
+                        {category}
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
+                      {cleanDesc}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-200/60 text-[10px]">
+                    <span className="text-slate-500 font-medium">{equipment}</span>
+                    <span className="font-bold text-indigo-600 group-hover:underline">
+                      + Add to Interval
+                    </span>
+                  </div>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
-                  {ex.description ? ex.description.replace(/<[^>]*>?/gm, '') : 'Live functional movement.'}
-                </p>
-                <span className="text-[10px] font-bold text-indigo-600 mt-2 block">+ Add to current interval routine</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
