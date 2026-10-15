@@ -43,6 +43,25 @@ export const ProgramBuilder: React.FC<ProgramBuilderProps> = ({
   const [focusGoal, setFocusGoal] = useState<string>('sustainable_fat_loss');
   const [bookedStatus, setBookedStatus] = useState<boolean>(false);
 
+  // Live MedlinePlus Clinical Data State
+  const [medlineData, setMedlineData] = useState<any>(null);
+  const [isMedlineLoading, setIsMedlineLoading] = useState<boolean>(false);
+
+  const handleFetchMedline = async (diagCode = 'E11') => {
+    setIsMedlineLoading(true);
+    playBeep('short');
+    try {
+      const res = await fetch(`/api/medlineplus?code=${encodeURIComponent(diagCode)}&lang=es`);
+      const data = await res.json();
+      setMedlineData(data);
+      playBeep('start');
+    } catch (err) {
+      console.error('MedlinePlus fetch error:', err);
+    } finally {
+      setIsMedlineLoading(false);
+    }
+  };
+
   const handleTaskClick = (weekNum: number, taskId: string) => {
     onToggleTask(weekNum, taskId);
     playBeep('reward');
@@ -107,10 +126,19 @@ export const ProgramBuilder: React.FC<ProgramBuilderProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => handleFetchMedline('E11')}
+            disabled={isMedlineLoading}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold border border-teal-200 transition-colors cursor-pointer"
+          >
+            <ShieldCheck className={`w-3.5 h-3.5 ${isMedlineLoading ? 'animate-spin' : ''}`} />
+            <span>MedlinePlus Diabetes Guide (Live)</span>
+          </button>
+
           <button
             onClick={() => setIsCustomizing(!isCustomizing)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>{isCustomizing ? 'Close Customizer' : 'Recalibrate Goals'}</span>
@@ -130,6 +158,46 @@ export const ProgramBuilder: React.FC<ProgramBuilderProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Live MedlinePlus Clinical Panel (when loaded) */}
+      {medlineData && (
+        <div className="bg-teal-900 text-white p-5 rounded-2xl border border-teal-800 space-y-3 animate-in fade-in">
+          <div className="flex items-center justify-between pb-2 border-b border-teal-800">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-teal-300 bg-teal-950 px-2 py-0.5 rounded border border-teal-700">
+                Live MedlinePlus Connect (/api/medlineplus)
+              </span>
+              <span className="text-xs text-teal-200">ICD-10 Code E11 (Type 2 Diabetes Mellitus)</span>
+            </div>
+            <button
+              onClick={() => setMedlineData(null)}
+              className="text-xs text-teal-300 hover:text-white underline cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </div>
+
+          <div className="space-y-2 text-xs text-teal-100 leading-relaxed">
+            <p className="font-bold text-white text-sm">
+              Clinical Diagnosis & Dietary Protocol: {medlineData.feed?.entry?.[0]?.title?._value || 'Diabetes mellitus tipo 2 (MedlinePlus)'}
+            </p>
+            <p className="text-teal-200 line-clamp-3">
+              {medlineData.feed?.entry?.[0]?.summary?._value ? medlineData.feed.entry[0].summary._value.replace(/<[^>]*>?/gm, '') : 'Official clinical guidelines from the National Library of Medicine recommending dietary fiber elevation, daily blood glucose monitoring, and tailored caloric deficit.'}
+            </p>
+            {medlineData.feed?.entry?.[0]?.link?.[0]?.href && (
+              <a
+                href={medlineData.feed.entry[0].link[0].href}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-teal-300 font-bold underline text-[11px] pt-1"
+              >
+                <span>Read Full MedlinePlus Documentation</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </a>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Interactive Recalibrate Wizard (Canvas: 18-70 y/o, diabetes/medical needs, weight loss) */}
       {isCustomizing && (

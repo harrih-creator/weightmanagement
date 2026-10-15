@@ -36,6 +36,52 @@ export const OnlineTraining: React.FC<OnlineTrainingProps> = ({
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [completedWorkoutModal, setCompletedWorkoutModal] = useState<boolean>(false);
 
+  // Live Wger Exercise Database state
+  const [wgerExercises, setWgerExercises] = useState<any[]>([]);
+  const [isWgerLoading, setIsWgerLoading] = useState<boolean>(false);
+  const [showWgerDrawer, setShowWgerDrawer] = useState<boolean>(false);
+
+  // Live TheSportsDB Athletic Team state
+  const [sportsTeamData, setSportsTeamData] = useState<any>(null);
+  const [isSportsLoading, setIsSportsLoading] = useState<boolean>(false);
+
+  // Fetch live Wger exercise database
+  const handleFetchWger = async () => {
+    setIsWgerLoading(true);
+    setShowWgerDrawer(true);
+    playBeep('short');
+    try {
+      const res = await fetch('/api/exercises?language=2&limit=15');
+      const data = await res.json();
+      if (data?.results) {
+        setWgerExercises(data.results);
+        playBeep('start');
+      }
+    } catch (err) {
+      console.error('Wger fetch error:', err);
+    } finally {
+      setIsWgerLoading(false);
+    }
+  };
+
+  // Fetch live TheSportsDB athletic club data
+  const handleFetchSportsTeam = async (teamName = 'Arsenal') => {
+    setIsSportsLoading(true);
+    playBeep('short');
+    try {
+      const res = await fetch(`/api/sports?team=${encodeURIComponent(teamName)}`);
+      const data = await res.json();
+      if (data?.teams?.[0]) {
+        setSportsTeamData(data.teams[0]);
+        playBeep('start');
+      }
+    } catch (err) {
+      console.error('TheSportsDB fetch error:', err);
+    } finally {
+      setIsSportsLoading(false);
+    }
+  };
+
   // Timer interval effect
   useEffect(() => {
     let interval: any = null;
@@ -118,7 +164,25 @@ export const OnlineTraining: React.FC<OnlineTrainingProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleFetchWger}
+            disabled={isWgerLoading}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors cursor-pointer"
+          >
+            <Dumbbell className={`w-3.5 h-3.5 ${isWgerLoading ? 'animate-spin' : ''}`} />
+            <span>Live Wger Exercises ({wgerExercises.length || 'Explore'})</span>
+          </button>
+
+          <button
+            onClick={() => handleFetchSportsTeam('Arsenal')}
+            disabled={isSportsLoading}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition-colors cursor-pointer"
+          >
+            <Award className="w-3.5 h-3.5 text-emerald-600" />
+            <span>TheSportsDB Live Team</span>
+          </button>
+
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700"
@@ -128,6 +192,95 @@ export const OnlineTraining: React.FC<OnlineTrainingProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Live TheSportsDB Team Card (when loaded) */}
+      {sportsTeamData && (
+        <div className="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in">
+          <div className="flex items-center gap-4">
+            {sportsTeamData.strBadge && (
+              <img
+                src={sportsTeamData.strBadge}
+                alt={sportsTeamData.strTeam}
+                className="w-16 h-16 object-contain"
+              />
+            )}
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">
+                  Live TheSportsDB (/api/sports)
+                </span>
+                <span className="text-xs text-slate-400">{sportsTeamData.strLeague} · {sportsTeamData.strCountry}</span>
+              </div>
+              <h3 className="text-lg font-black text-white mt-0.5">{sportsTeamData.strTeam} Athletic Conditioning</h3>
+              <p className="text-xs text-slate-300 line-clamp-2 max-w-2xl mt-1">
+                {sportsTeamData.strDescriptionEN || `Founded in ${sportsTeamData.intFormedYear}. Pro training stadium: ${sportsTeamData.strStadium}.`}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setSportsTeamData(null)}
+            className="text-xs text-slate-400 hover:text-white underline shrink-0"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Live Wger Exercise Explorer (when toggled) */}
+      {showWgerDrawer && (
+        <div className="bg-white p-6 rounded-2xl border border-indigo-200 shadow-xs space-y-4 animate-in fade-in">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                Live Wger Workout API (/api/exercises)
+              </span>
+              <h2 className="text-sm font-bold text-slate-900 mt-1">
+                Open Exercise Database ({wgerExercises.length} live exercises loaded)
+              </h2>
+            </div>
+            <button
+              onClick={() => setShowWgerDrawer(false)}
+              className="text-xs font-bold text-slate-400 hover:text-slate-700"
+            >
+              Hide Explorer
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-72 overflow-y-auto">
+            {wgerExercises.map((ex) => (
+              <div
+                key={ex.id}
+                onClick={() => {
+                  setSelectedRoutine((prev) => ({
+                    ...prev,
+                    exercises: [
+                      {
+                        name: ex.name || 'Wger Exercise',
+                        sets: 3,
+                        repsOrDuration: '12 reps',
+                        targetMuscle: ex.category?.name || 'Full Body',
+                        instruction: ex.description ? ex.description.replace(/<[^>]*>?/gm, '').slice(0, 120) : 'Perform controlled movement with steady tempo.'
+                      },
+                      ...prev.exercises
+                    ]
+                  }));
+                  playBeep('start');
+                }}
+                className="p-3 bg-slate-50 hover:bg-indigo-50/50 rounded-xl border border-slate-200/80 hover:border-indigo-300 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-900 group-hover:text-indigo-700 line-clamp-1">{ex.name}</span>
+                  <span className="text-[10px] font-semibold text-slate-400 shrink-0 ml-2">ID #{ex.id}</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                  {ex.description ? ex.description.replace(/<[^>]*>?/gm, '') : 'Live functional movement.'}
+                </p>
+                <span className="text-[10px] font-bold text-indigo-600 mt-2 block">+ Add to current interval routine</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Active Workout Player Widget */}
       <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-xl border border-slate-800">

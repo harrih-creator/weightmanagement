@@ -20,13 +20,15 @@ interface HeaderProps {
   setActiveTab: (tab: string) => void;
   onOpenReferralModal: () => void;
   onOpenTierModal: () => void;
+  onOpenApisModal: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   user,
   setActiveTab,
   onOpenReferralModal,
-  onOpenTierModal
+  onOpenTierModal,
+  onOpenApisModal
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications] = useState([
@@ -97,6 +99,16 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Coins className="w-4 h-4 text-emerald-600 fill-emerald-500/20" />
             <span>{user.fitPoints.toLocaleString()} <span className="font-normal text-[11px]">pts</span></span>
+          </button>
+
+          {/* Live APIs Trigger */}
+          <button
+            onClick={onOpenApisModal}
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-100/70 hover:bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-300 transition-colors cursor-pointer"
+            title="Inspect live data from OpenFoodFacts, Wger, TheMealDB, MedlinePlus & TheSportsDB"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-emerald-700 animate-pulse" />
+            <span>Live APIs</span>
           </button>
 
           {/* Subscription Tier */}

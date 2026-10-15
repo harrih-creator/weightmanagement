@@ -31,6 +31,7 @@ import { DeviceSyncInBody } from './components/DeviceSyncInBody';
 import { CalendarView } from './components/CalendarView';
 import { RewardsMarketplace } from './components/RewardsMarketplace';
 import { BusinessCanvasDrawer } from './components/BusinessCanvasDrawer';
+import { LiveDataConnectorsModal } from './components/LiveDataConnectorsModal';
 import {
   Share2,
   Sparkles,
@@ -60,6 +61,7 @@ export default function App() {
   const [showReferralModal, setShowReferralModal] = useState<boolean>(false);
   const [showTierModal, setShowTierModal] = useState<boolean>(false);
   const [showCanvasDrawer, setShowCanvasDrawer] = useState<boolean>(false);
+  const [showApisModal, setShowApisModal] = useState<boolean>(false);
   const [copiedReferral, setCopiedReferral] = useState<boolean>(false);
 
   // Food handlers
@@ -187,6 +189,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         onOpenReferralModal={() => setShowReferralModal(true)}
         onOpenTierModal={() => setShowTierModal(true)}
+        onOpenApisModal={() => setShowApisModal(true)}
       />
 
       {/* Navigation */}
@@ -284,10 +287,18 @@ export default function App() {
               <Layers className="w-3.5 h-3.5" />
               <span>Canvas Requirement Matrix</span>
             </button>
+            <span>·</span>
+            <button
+              onClick={() => setShowApisModal(true)}
+              className="font-bold text-slate-800 hover:text-emerald-700 flex items-center gap-1 cursor-pointer underline"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Live External APIs Inspector</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-4 text-slate-400">
-            <span>Partners: ActiveSG · Health365 · InBody · Hyrox · SaladStop!</span>
+            <span>External APIs: OpenFoodFacts · Wger · TheMealDB · MedlinePlus · TheSportsDB</span>
           </div>
         </div>
       </footer>
@@ -409,6 +420,12 @@ export default function App() {
         isOpen={showCanvasDrawer}
         onClose={() => setShowCanvasDrawer(false)}
         onNavigate={setActiveTab}
+      />
+
+      {/* Live Data Connectors Modal */}
+      <LiveDataConnectorsModal
+        isOpen={showApisModal}
+        onClose={() => setShowApisModal(false)}
       />
 
     </div>
