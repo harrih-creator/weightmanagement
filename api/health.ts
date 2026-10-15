@@ -14,7 +14,6 @@ export default async function handler(req: any, res?: any) {
     environment: process.env.NODE_ENV || 'development',
     availableEndpoints: [
       { path: '/api/health', method: 'GET', description: 'API health and diagnostics check' },
-      { path: '/api/busarrival', method: 'GET', description: 'Live Singapore LTA DataMall bus arrivals' },
       { path: '/api/openfoodfacts', method: 'GET', description: 'OpenFoodFacts product nutrition & Nutri-Score' },
       { path: '/api/exercises', method: 'GET', description: 'Wger exercise database' },
       { path: '/api/meals', method: 'GET', description: 'TheMealDB healthy recipes' },
@@ -22,7 +21,6 @@ export default async function handler(req: any, res?: any) {
       { path: '/api/sports', method: 'GET', description: 'TheSportsDB athletic team data' }
     ],
     configuredKeys: {
-      ltaDatamall: Boolean(process.env.LTA_DATAMALL_KEY || process.env.LTA_ACCOUNT_KEY),
       theSportsDb: Boolean(process.env.THESPORTSDB_API_KEY)
     },
     latencyMs: Date.now() - startTime
