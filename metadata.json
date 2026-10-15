@@ -1,0 +1,6 @@
+{
+  "name": "VitalPact - Smart Weight Management & Health Ecosystem",
+  "description": "Comprehensive weight management platform featuring AI calorie photo tracking, certified trainer booking, InBody/wearable integration, personalized health roadmaps, and community rewards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
